@@ -1,0 +1,132 @@
+---
+title: "Stat 579 - Life Expectancy"
+author: "Spencer Wadsworth"
+date: "8/30/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=4, fig.height=4)
+library(tidyverse)
+```
+
+# Life Expectancy in Mexico, Canada and the US 
+
+## Step-by-step plan of work
+
+1. Read the data
+2. Focus on values of Canada
+3. Visualize the values for Canada
+4. See whether we can find the problem
+5. ... then we'll see ...
+
+## Reading the data 
+
+```{r}
+url <- "https://raw.githubusercontent.com/Stat579-at-ISU/stat579-at-isu.github.io/master/homework/data/gapminder-5060.csv" # nasty looking, but doesn't make any assumptions about data on your machine
+life5060 <- read.csv(url)
+head(life5060)
+```
+
+## Focus on the values for Canada
+
+```{r}
+canada <- life5060 %>% filter(country == "Canada")
+head(canada)
+```
+
+## Visualize 
+
+Draw a line for the life expectancy in Canada:
+```{r}
+canada %>% 
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line()
+```
+
+Clearly there is something wrong with the value in 1957.
+
+## Find the problematic value and fix it
+
+```{r}
+canada %>% filter(year == 1957)
+
+canada_fixed <- canada %>% mutate(
+  lifeExp = replace(lifeExp, year==1957, 69.96)  
+)
+```
+
+## visualize the fixed data
+
+```{r}
+canada_fixed %>% ggplot(aes(x = year, y = lifeExp)) +
+  geom_line()
+```
+
+## ... on to the stretch goal ... 
+
+Add lines for Mexico and the US
+
+```{r}
+canada_fixed %>% 
+  ggplot(aes(x = year, y = lifeExp, group=country)) + geom_line() +
+  geom_line(data = life5060 %>% 
+              filter(country %in% c("United States", "Mexico")))
+```
+
+## ... on to the stretch goal ... 
+
+Add lines for Mexico and the US, color lines by country and add a legend
+
+```{r, fig.width = 6}
+canada_fixed %>% 
+  ggplot(aes(x = year, y = lifeExp, colour=country)) + geom_line() +
+  geom_line(data = life5060 %>% 
+              filter(country %in% c("United States", "Mexico")))
+
+```
+
+## read in 70s-80s data set and combine two sets
+
+```{r}
+new_url <- 'https://raw.githubusercontent.com/Stat579-at-ISU/stat579-at-isu.github.io/master/homework/data/gap7080.csv'
+life7080 <- read.csv(new_url)
+
+##Combind the two life files
+combined_life <- rbind(life5060, life7080)
+```
+
+## focus on Canada again 
+
+```{r}
+canada2 <- life7080 %>% filter(country == "Canada")
+canada2
+
+##Combine Canadas 50s-80s
+canada_fixed2 <- rbind(canada_fixed, canada2)
+```
+
+```{r}
+canada2 %>% 
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line()
+```
+
+## 70s and 80s line plot
+
+```{r}
+canada2 %>% 
+  ggplot(aes(x = year, y = lifeExp, colour=country)) + geom_line() +
+  geom_line(data = life7080 %>% 
+              filter(country %in% c("United States", "Mexico")))
+```
+
+## Combined 50s-80s line plot
+#### The plot below shows that life expectancy between the 50s and 80s tended to increase in each of the three countries under question. Canda has apparently had the highest life expectancy and Mexico the lowest, although the life expectancy in Mexico appears to have increased at a faster rate than in the other two countries.
+```{r}
+canada_fixed2 %>% 
+  ggplot(aes(x = year, y = lifeExp, colour=country)) + geom_line() +
+  geom_line(data = combined_life %>% 
+              filter(country %in% c("United States", "Mexico")))
+```
+
