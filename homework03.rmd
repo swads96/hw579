@@ -1,6 +1,6 @@
 ---
 title: 'Stat 579 - Homework #3 - Section A'
-author: "Spencer Wadsworth"
+author: "Your Name"
 date: "9/19/2019"
 output: html_document
 ---
@@ -50,7 +50,6 @@ iowa %>%
 ### My expectation before plotting this is that there will be a positive linear relationship between height and weight for each sex as well as in the refused and mission options. The real plot shows clusters in the four corners in both the male and female plots. The refused and mission plots also show the clusters, but just not in each of the four corners. The plot doesn't really match my expectation at all, and there isn't much information to be gleaned from what is shown. It's also worth noting that 133 rows were removed, presumably because of missing values.
 
 5. Temporarily restrict weight and height to below 2500, then plot the values again. Describe the plot you see.
-
 ```{r}
 temp <- iowa[which(iowa$HEIGHT3 & iowa$WEIGHT2 <= 2500),]
 temp %>%
@@ -58,7 +57,7 @@ temp %>%
   geom_point() +
   facet_wrap(~SEX1)
 ```
-### This plot shows more of a linear relationship, but still not the positive linear relationship I would have expected. Though the weights vary, the heights appear clustered again, which makes little sense because height is a continous variable. 
+### This plot shows more of a linear relationship, but still not the positive linear relationship I would have expected. Though the weights vary, the heights appear clustered again, which makes little sense because height is a continous variable.
 
 It turns out, that the following coding scheme is used for HEIGHT3:
 
@@ -70,67 +69,62 @@ It turns out, that the following coding scheme is used for HEIGHT3:
 | 9999	| Refused |
 | BLANK |	Not asked or Missing |
 
-The overall goal is to introduce a new variable `height` that corresponds to reported height in centimeters [cm].
+6. Use a combination of `filter` and logical expressions to answer the following questions:
 
-
-6. Introduce a variable `feet` into the data set `iowa` that contains the hundreds and thousands of the `HEIGHT3` variable. Hint: Think of the integer division `%/%` and use `mutate`.<br>
-
+  a. What proportion of the height measurements are taken in metric measurements? 
 ```{r}
-iowa <- iowa %>%
-  mutate(feet = HEIGHT3 %/% 100)
+metric <- iowa %>%
+  filter(between(HEIGHT3, 9000, 9998))
+dim(metric)[1]/dim(iowa)[1]
 ```
+### Proportion of height measurements in metric is 0.00855
 
-Replace values of 77 and above in `feet` by missing value symbol `NA`.<br>
-How many missing values does the variable `feet` have at this point? Hint: `?is.na`
-
-```{r}
-for (i in 1:length(iowa$feet)) {
-  if (iowa$feet[i] >= 77 | is.na(iowa$feet[i])) {
-    iowa$feet[i] <- NA
-  }
-}
-sum(is.na(iowa$feet))
-```
-### There are now 330 missing values in the `feet` variable 
-
-7. Introduce a variable `inch` into the data set `iowa` that consists of the last two digits in the variable `HEIGHT3`. Hint: Think of the modulo operator `%%`.<br>
-Replace all values that are missing in the `feet` variable by missing values in the variable `inch`. 
+  b. What is the range of (standard) height measurements for men, what is the range of (standard) height measurements for women? Draw histograms of (standard) height, facet by gender. Make sure to choose an appropriate bin width. Comment on the histograms and your choice of bin width.
 
 ```{r}
-iowa <- iowa %>%
-  mutate(inch = HEIGHT3 %% 100)
-for (i in 1:length(iowa$feet)) {
-  if (is.na(iowa$feet[i])) {
-    iowa$inch[i] <- NA
-  }
-}
-sum(is.na(iowa$inch))
-```
+standard <- iowa %>%
+  filter(between(HEIGHT3, 200, 711))
+range(standard$HEIGHT3)
 
-8. Introduce a variable `height` in the iowa data that is a conversion of the height values in feet and inch to meters. For your convenience: 1 ft equals 30.48 cm, 1 inch equals 2.54 cm. 1 m equals 100 cm.
-
-```{r}
-iowa <- iowa %>%
-  mutate(height = feet*30.48 + inch*2.54)
-```
-
-9. Plot a histogram of `height`, facet by gender such that the histograms are on top of each other. Choose an appropriate bin width and comment on the resulting plot. 
-
-```{r}
-iowa %>%
-  ggplot(aes(x=height)) +
-  geom_histogram() +
+standard %>%
+  ggplot(aes(x=HEIGHT3)) +
+  geom_histogram(binwidth = 5) +
   facet_wrap(~SEX1)
-```
-```{r}
-q <- iowa$height
-for (i in 1:length(iowa$HEIGHT3)) {
-  if (iowa$HEIGHT3[i] < 9999 & iowa$HEIGHT3[i] >= 9000 | is.na(iowa$HEIGHT3[i])) {
-    q[i] <- iowa$HEIGHT3[i]
-  }
-}
-```
+```  
+### The range of the standard heights is between 3' and 6'10".
+### The histograms show a rough distribution of height for men and for women. There are two other options for gender, but no observations show up for standard height. Because the numbers are 400-411, 500-511, 600-611, there is an awkward transition between feet in the histograms. The binwidth I chose shows that there are 2 or 3 bins for each foot measurement, so at the 500 (5 feet) point in the graph for men, there are three bins, probably just separated roughly every 4 inches. 
 
+  c. How many missing values (?`is.na`) does the variable HEIGHT3 have?
+```{r}
+sum(is.na(iowa$HEIGHT3))
+```
+### There are 133 missing values.
+
+7. Fact finding - you might have to make use of the [codebook](https://www.cdc.gov/brfss/annual_data/2017/pdf/codebook17_llcp-v2-508.pdf) to answer the following questions, if you use the codebook, please include this in a comment in your answer. For all answers, include the code you used to get to the answer.
+
+  a. What is the mode of the number of adults (`NUMADULT`) in a household in Iowa in 2017?
+```{r}
+tab <- table(iowa$NUMADULT)
+tab[tab == max(tab)]
+```
+### The mode of number of adults is 2 with that number occuring 1,187 times.
+
+  b. `EDUCA` is the variable containing the highest grade or year of school completed. Is the percentage of college graduates in Iowa higher or lower than the nation's average (based on the BRFSS sample)? 
+  
+```{r}
+sum(iowa$EDUCA == 6)/dim(iowa)[1]
+```
+### The percentage of college graduates in Iowa is 32.67%. This is lower than the national average of 37.42% from the codebook.
+
+  c. Out of the people asked, what percentage of people got their flu shot (`FLSHTMY2`)  in July 2017 or after?
+  
+```{r}
+last_shot <- max(iowa$FLSHTMY2[iowa$FLSHTMY2 < 777777], na.rm=T)
+shots <- filter(iowa, between(FLSHTMY2, 72017, last_shot))
+dim(shots)[1]/dim(iowa)[1]
+```
+### 37.12% of people got their flu shots in July 2017 or later. I learned the exact code for flu shots from the codebook.
+    
 
 Due date: the homework is due a week from now on Thursday. 
 
