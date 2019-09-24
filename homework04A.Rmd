@@ -92,13 +92,27 @@ sum(is.na(iowa$height))
 
 ```{r}
 mean(iowa$height, na.rm=T)
+mean(iowa$height[iowa$SEX1==1], na.rm=T)
+mean(iowa$height[iowa$SEX1==2], na.rm=T)
 ```
 
 6. Plot a histogram of `height`, facet by gender such that the histograms are on top of each other. Choose an appropriate bin width and comment on the resulting plot. 
+```{r}
+iowa %>% 
+  ggplot(aes(x=height,fill = factor(SEX1)) ) + 
+  geom_histogram() +
+  facet_wrap(~SEX1)
+```
 7. The variable `WTKG3` has measurements of weight in 10s of grams (i.e. `WTKG3` divided by 100 gives the weight in kilogram). 
 
-8. Use `ggplot2` to draw a scatterplot of weight (`WTKG3`) by height (new `height` variable). Facet by gender and comment.
 
+8. Use `ggplot2` to draw a scatterplot of weight (`WTKG3`) by height (new `height` variable). Facet by gender and comment.
+```{r}
+iowa %>% 
+  ggplot(aes(x = height, y = WTKG3)) +
+  geom_point() +
+  facet_wrap(~SEX1)
+```
 Due date: the homework is due a week from now on Thursday. 
 
 For the submission: submit your solution in an R Markdown file and (just for insurance) submit the corresponding html/word file with it. 
