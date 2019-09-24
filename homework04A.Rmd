@@ -49,10 +49,50 @@ The overall goal is to introduce a new variable `height` that corresponds to rep
 
 3. Sketch out a way to derive a new variable `height` that represents the values in `HEIGHT3` in centimeters and properly encodes any unavailable information as missing values (`NA`).
 Implement your transformation. For your convenience: 1 ft equals 30.48 cm, 1 inch equals 2.54 cm. 1 m equals 100 cm.
+```{r}
+iowa <- iowa %>%
+  mutate(feet = HEIGHT3 %/% 100)
+for (i in 1:length(iowa$feet)) {
+  if (iowa$feet[i] >= 77 | is.na(iowa$feet[i])) {
+    iowa$feet[i] <- NA
+  }
+}
+sum(is.na(iowa$feet))
+iowa <- iowa %>%
+  mutate(inch = HEIGHT3 %% 100)
+for (i in 1:length(iowa$feet)) {
+  if (is.na(iowa$feet[i])) {
+    iowa$inch[i] <- NA
+  }
+}
+sum(is.na(iowa$inch))
+
+iowa <- iowa %>%
+  mutate(height = feet*30.48 + inch*2.54)
+
+iowa <- iowa %>% 
+  mutate(metric = ifelse(between(HEIGHT3, 9000, 9998), HEIGHT3 %% 1000, NA))
+
+for (i in 1:dim(iowa)[1]) {
+  if (!is.na(iowa$metric[i])) {
+    iowa$height[i] <- iowa$metric[i]
+  }
+}
+
+
+```
 
 4. How  many missing values does the variable `height` have? 
+
+```{r}
+sum(is.na(iowa$height))
+```
+
 5. What is the average height among respondents of the survey? among men? among women? Does the result make sense? Comment.
 
+```{r}
+mean(iowa$height, na.rm=T)
+```
 
 6. Plot a histogram of `height`, facet by gender such that the histograms are on top of each other. Choose an appropriate bin width and comment on the resulting plot. 
 7. The variable `WTKG3` has measurements of weight in 10s of grams (i.e. `WTKG3` divided by 100 gives the weight in kilogram). 
