@@ -87,6 +87,7 @@ for (i in 1:dim(iowa)[1]) {
 ```{r}
 sum(is.na(iowa$height))
 ```
+### There are 252 missing values
 
 5. What is the average height among respondents of the survey? among men? among women? Does the result make sense? Comment.
 
@@ -95,12 +96,13 @@ mean(iowa$height, na.rm=T)
 mean(iowa$height[iowa$SEX1==1], na.rm=T)
 mean(iowa$height[iowa$SEX1==2], na.rm=T)
 ```
+### The average height among respondents is 171.228cm. Among men is 178.821cm. And among women is 164.275cm.
 
 6. Plot a histogram of `height`, facet by gender such that the histograms are on top of each other. Choose an appropriate bin width and comment on the resulting plot. 
 ```{r}
 iowa %>% 
   ggplot(aes(x=height,fill = factor(SEX1)) ) + 
-  geom_histogram() +
+  geom_histogram() #+
   facet_wrap(~SEX1)
 ```
 7. The variable `WTKG3` has measurements of weight in 10s of grams (i.e. `WTKG3` divided by 100 gives the weight in kilogram). 
