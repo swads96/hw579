@@ -1,6 +1,6 @@
 ---
 title: 'Stat 579 - Homework #4 - Section A'
-author: "Your Name"
+author: "Spencer Wadsworth"
 date: "9/26/2019"
 output: html_document
 ---
@@ -101,9 +101,10 @@ mean(iowa$height[iowa$SEX1==2], na.rm=T)
 6. Plot a histogram of `height`, facet by gender such that the histograms are on top of each other. Choose an appropriate bin width and comment on the resulting plot. 
 ```{r}
 iowa %>% 
+  filter(SEX1 %in% 1:2) %>% 
   ggplot(aes(x=height,fill = factor(SEX1)) ) + 
-  geom_histogram() #+
-  facet_wrap(~SEX1)
+  geom_histogram() +
+  facet_grid(rows = vars(SEX1))
 ```
 7. The variable `WTKG3` has measurements of weight in 10s of grams (i.e. `WTKG3` divided by 100 gives the weight in kilogram). 
 
@@ -111,6 +112,7 @@ iowa %>%
 8. Use `ggplot2` to draw a scatterplot of weight (`WTKG3`) by height (new `height` variable). Facet by gender and comment.
 ```{r}
 iowa %>% 
+  filter(SEX1 %in% 1:2) %>% 
   ggplot(aes(x = height, y = WTKG3)) +
   geom_point() +
   facet_wrap(~SEX1)
